@@ -1,0 +1,143 @@
+import java.util.*;
+import java.sql.*;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.Date.*;
+import java.text.SimpleDateFormat;
+import java.io.*;
+class student  implements ActionListener
+{
+JFrame f;
+JLabel l;
+ImageIcon img;
+JButton b1,b2;
+Font n;
+void student(String stu) throws IOException
+{
+
+f=new JFrame("library");
+f.setSize(1400,727);
+f.setLayout(null);
+
+img=new ImageIcon("library.jpg");
+l=new JLabel();
+l.setBounds(0,0,1370,706);
+f.add(l);
+l.setIcon(img);
+
+n=new Font("Ariel",Font.BOLD,20);
+b1=new JButton("Home");
+b1.setFont(n);
+b1.setBounds(850,50,100,40);
+b1.setBackground(new Color(176,0,0));
+b1.setForeground(Color.white);
+l.add(b1);
+b1.addActionListener(this);
+
+b2=new JButton("Back");
+b2.setFont(n);
+b2.setBounds(990,50,100,40);
+b2.setBackground(new Color(176,0,0));
+b2.setForeground(Color.white);
+l.add(b2);
+b2.addActionListener(this);
+
+f.setVisible(true);
+try
+{
+Class.forName("com.mysql.jdbc.Driver");
+Connection con=DriverManager.getConnection("jdbc:mysql://localhost:3306/library","root","");
+Statement stat=con.createStatement();
+ResultSet rs=stat.executeQuery("Select * from issuebook");
+int ctr=0;
+while(rs.next())
+{
+	String st=rs.getString("student_id");
+	if(stu.equals(st))
+	{
+		 		
+ctr++;
+	}
+}
+rs.close();
+String[][] data=new String[ctr][8];
+String[] cols={"student_id","book_name","author_name","edition","book_id","issue_date"};
+String[] cols1={"Your ID","Book_name","Author_name","Edition","Book_ID","Issue_date","Return_date","Fine"};
+ rs=stat.executeQuery("Select * from issuebook");
+ int j=0;
+while(rs.next())
+{
+	String st=rs.getString("student_id");
+	if(stu.equals(st))
+	{
+	for(int i=0;i<=5;i++)
+	{
+data[j][i]=rs.getString(cols[i]);
+	}
+	
+	 java.util.Date today= new java.util.Date();
+	 
+	   String issuedate=rs.getString("issue_date");
+	   SimpleDateFormat qq=new SimpleDateFormat("dd/MM/yyyy");
+	   java.util.Date ndate=qq.parse(issuedate);
+		   long difference = today.getTime() -ndate.getTime();
+	   long daysBetween = (difference / (1000*60*60*24));
+		   
+		   if(daysBetween<=15)
+		   {
+	                   long ldays=15-daysBetween;
+			   String day=ldays+" Days left";
+			   data[j][6]=day;
+			   String fine="No fine";
+			   data[j][7]=fine;
+		 }
+		 else if((daysBetween>15) && (daysBetween<=25))
+		 {
+			 long ldays=daysBetween-15;
+			   String day=ldays+" Days \n extra";
+			   data[j][6]=day;
+			   long fine=ldays*5;
+			   data[j][7]=String.valueOf("Rs "+fine);
+			 
+			 
+		 }
+	j++;
+	}	
+}
+rs.close();
+JTable jt=new JTable(data,cols1);
+
+JScrollPane sp=new JScrollPane(jt); 
+sp.setBounds(150,150,1070,500);
+l.add(sp);
+jt.setRowHeight(120);
+jt.setForeground(Color.white);
+jt.setBackground(Color.black);
+Font n=new Font("Ariel",Font.BOLD,20);
+jt.setFont(n);
+
+}
+catch(Exception e)
+{
+	System.out.println(e);
+	
+	
+}
+
+}
+public void actionPerformed(ActionEvent ae)
+{	
+	if(ae.getSource()==b1)
+	{
+		f.dispose();
+		library ad=new library();
+	}
+	if(ae.getSource()==b2)
+	{
+		f.dispose();
+		studentlogin adl=new studentlogin();
+	}
+}
+
+}
